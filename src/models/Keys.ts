@@ -9,12 +9,10 @@ const KeysSchema: Schema = new mongoose.Schema(
       unique: true,
     },
     publicKey: {
-      type: String,
-      required: true,
+      type: Object,
     },
     privateKey: {
-      type: String,
-      required: true,
+      type: Object,
     },
   },
   {
@@ -25,8 +23,8 @@ const KeysSchema: Schema = new mongoose.Schema(
 /* ------ custom interface -------*/
 
 export interface KeysType extends mongoose.Document {
-  publicKey: string;
-  privateKey: string;
+  publicKey: any;
+  privateKey: any;
   username: string;
 }
 

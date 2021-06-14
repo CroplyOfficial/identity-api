@@ -10,9 +10,7 @@ const iv = crypto.randomBytes(16);
 const encryptionSecret: any = process.env.ENC_SECRET;
 
 const encrypt = (text: string) => {
-  console.log(text, encryptionSecret);
   const cipher = crypto.createCipheriv(algorithm, encryptionSecret, iv);
-
   const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
 
   return {

@@ -1,8 +1,9 @@
 import asyncHandler from 'express-async-handler';
 import User, { UserType } from '../models/User';
-import { tokenize } from '../functions/jwt';
+import { tokenize } from '../utils/jwt';
 import { createIdentity } from '../utils/did';
 import { Request, Response } from 'express';
+import Keys, { KeysType } from '../models/Keys';
 
 /*
  *  @desc    Route to create the DID for the organisation during the initial setup
@@ -19,15 +20,22 @@ const identityCreation = asyncHandler(async (req: Request, res: Response) => {
   // proceed with creation if the username is avalaible
   if (!userExists) {
     try {
-      const didMessage: string = await createIdentity();
+      const { messageId, key }: any = await createIdentity();
 
       const user: UserType = await User.create({
         username,
         password,
         pin,
-        didMessage,
+        didMessage: messageId,
       });
-      const token = await tokenize(user._id);
+
+      const keys: KeysType = await Keys.create({
+        username,
+        publicKey: key.public,
+        privateKey: key.secret,
+      });
+
+      const token: string = tokenize(user._id);
 
       res.status(201);
       res.json({ id: user._id, username: user.username, token });

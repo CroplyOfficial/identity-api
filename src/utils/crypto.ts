@@ -1,11 +1,16 @@
 import crypto from 'crypto';
+import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const algorithm = 'aes-256-ctr';
 const iv = crypto.randomBytes(16);
 
-const encrypt = (text: string, encryptionSecret: string) => {
-  const cipher = crypto.createCipheriv(algorithm, encryptionSecret, iv);
+const encryptionSecret: any = process.env.ENC_SECRET;
 
+const encrypt = (text: string) => {
+  const cipher = crypto.createCipheriv(algorithm, encryptionSecret, iv);
   const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
 
   return {
@@ -14,7 +19,7 @@ const encrypt = (text: string, encryptionSecret: string) => {
   };
 };
 
-const decrypt = (hash: any, encryptionSecret: string) => {
+const decrypt = (hash: any) => {
   const decipher = crypto.createDecipheriv(
     algorithm,
     encryptionSecret,
@@ -29,11 +34,11 @@ const decrypt = (hash: any, encryptionSecret: string) => {
   return decrpyted.toString();
 };
 
-const encryptJSON = (json: any, encryptionSecret: string) => {
+const encryptJSON = (json: any) => {
   let encryptedData: any = new Object();
   for (let key in json) {
     if (key != 'ID') {
-      encryptedData[key] = encrypt(json[key], encryptionSecret);
+      encryptedData[key] = encrypt(json[key]);
     } else {
       encryptedData[key] = json[key];
     }
@@ -41,11 +46,11 @@ const encryptJSON = (json: any, encryptionSecret: string) => {
   return encryptedData;
 };
 
-const decryptJSON = (json: any, encryptionSecret: string) => {
+const decryptJSON = (json: any) => {
   let decryptedData: any = new Object();
   for (let key in json) {
     if (key != 'ID') {
-      decryptedData[key] = decrypt(json[key], encryptionSecret);
+      decryptedData[key] = decrypt(json[key]);
     } else {
       decryptedData[key] = json[key];
     }
@@ -53,4 +58,4 @@ const decryptJSON = (json: any, encryptionSecret: string) => {
   return decryptedData;
 };
 
-module.exports = { encryptJSON, decryptJSON, encrypt, decrypt };
+export { encryptJSON, decryptJSON, encrypt, decrypt };

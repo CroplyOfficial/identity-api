@@ -5,7 +5,7 @@ POST http://localhost:5000/api/users/identity
 Content-Type: application/json
 
 {
-  "username" : "user",
+  "username" : "us123123weasdf",
   "password": "password",
   "pin": "123456"
 }

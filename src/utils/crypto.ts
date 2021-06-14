@@ -1,4 +1,8 @@
 import crypto from 'crypto';
+import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const algorithm = 'aes-256-ctr';
 const iv = crypto.randomBytes(16);
@@ -6,6 +10,7 @@ const iv = crypto.randomBytes(16);
 const encryptionSecret: any = process.env.ENC_SECRET;
 
 const encrypt = (text: string) => {
+  console.log(text, encryptionSecret);
   const cipher = crypto.createCipheriv(algorithm, encryptionSecret, iv);
 
   const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);

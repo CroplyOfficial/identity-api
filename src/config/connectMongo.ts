@@ -9,8 +9,9 @@ import mongoose from 'mongoose';
 
 const connectToDB = async (): Promise<void> => {
   try {
-    const connString: string = process.env.MONGO_URI || '';
+    const connString: any = process.env.MONGO_URI;
     // await the connection from the URI
+
     const conn = await mongoose.connect(connString, {
       useUnifiedTopology: true,
       useNewUrlParser: true,

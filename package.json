@@ -7,9 +7,6 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "node server/dist/server",
-    "client": "npm start --prefix client",
-    "dev": "concurrently \"npm run start\" \"npm run client\"",
     "devserv": "nodemon server/src/server.ts",
     "build": "tsc -p ./server/",
     "start:prod": "node dist/server.js",

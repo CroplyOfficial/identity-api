@@ -1,9 +1,8 @@
-import asyncHandler from 'express-async-handler';
-import User, { UserType } from '../models/User';
-import { tokenize } from '../utils/jwt';
-import { createIdentity } from '../utils/did';
-import { Request, Response } from 'express';
-import Keys, { KeysType } from '../models/Keys';
+import asyncHandler from "express-async-handler";
+import User, { UserType } from "../models/User";
+import { tokenize } from "../utils/jwt";
+import { createIdentity } from "../utils/did";
+import { Request, Response } from "express";
 
 /*
  *  @desc    Route to create the DID for the organisation during the initial setup
@@ -20,19 +19,12 @@ const identityCreation = asyncHandler(async (req: Request, res: Response) => {
   // proceed with creation if the username is avalaible
   if (!userExists) {
     try {
-      const { messageId, key }: any = await createIdentity();
+      const { messageId }: any = await createIdentity();
 
       const user: UserType = await User.create({
         username,
         password,
         pin,
-        didMessage: messageId,
-      });
-
-      const keys: KeysType = await Keys.create({
-        username,
-        publicKey: key.public,
-        privateKey: key.secret,
       });
 
       const token: string = tokenize(user._id);
@@ -42,12 +34,12 @@ const identityCreation = asyncHandler(async (req: Request, res: Response) => {
     } catch (error) {
       res.status(400);
       console.log(error);
-      throw new Error('Bad request');
+      throw new Error("Bad request");
     }
   } else {
     // raise bad request and throw error if user already exists
     res.status(400);
-    throw new Error('User already exists');
+    throw new Error("User already exists");
   }
 });
 
@@ -68,7 +60,7 @@ const loginWithPin = asyncHandler(async (req, res) => {
         res.json({ id: user._id, username: user.username, token });
       } else {
         res.status(403);
-        throw new Error('Incorrect Pin');
+        throw new Error("Incorrect Pin");
       }
     } else {
       res.status(404);
@@ -96,7 +88,7 @@ const loginWithPassword = asyncHandler(async (req, res) => {
         res.json({ id: user._id, username: user.username, token });
       } else {
         res.status(403);
-        throw new Error('Incorrect Password');
+        throw new Error("Incorrect Password");
       }
     } else {
       res.status(404);

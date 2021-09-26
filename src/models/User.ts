@@ -1,5 +1,5 @@
-import mongoose, { Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import mongoose, { Schema } from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema: Schema = new mongoose.Schema(
   {
@@ -19,9 +19,6 @@ const userSchema: Schema = new mongoose.Schema(
       required: true,
       default: false,
     },
-    didMessage: {
-      type: String,
-    },
   },
   {
     timestamps: true,
@@ -35,7 +32,6 @@ export interface UserType extends mongoose.Document {
   password: string;
   pin: string;
   isAdmin: boolean;
-  didMessage: string;
 }
 
 /* ------- model methods ---------*/
@@ -54,9 +50,9 @@ userSchema.methods.matchPin = async function (
   return await bcrypt.compare(enteredPin, self.pin);
 };
 
-userSchema.pre('save', async function (next) {
+userSchema.pre("save", async function (next) {
   const self: any = this;
-  if (!self.isModified('password')) {
+  if (!self.isModified("password")) {
     next();
   } else {
     const salt = await bcrypt.genSalt(10);
@@ -65,6 +61,6 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-const User = mongoose.model<UserType>('User', userSchema);
+const User = mongoose.model<UserType>("User", userSchema);
 
 export default User;

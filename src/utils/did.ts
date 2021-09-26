@@ -1,5 +1,4 @@
 import {
-  DID,
   publish,
   Document,
   KeyType,
@@ -11,21 +10,27 @@ import bs58 from "bs58";
 
 const createIdentity = async (clientConfig: Object = {}) => {
   const mnemonic = Bip39.randomMnemonic();
+
+  console.log(mnemonic);
+
   const baseSeed = Ed25519Seed.fromMnemonic(mnemonic);
   const baseKeypair = baseSeed.keyPair();
-  const pubKey = bs58.encode(
-    Buffer.from(Converter.bytesToHex(baseKeypair.privateKey), "hex")
-  );
-  const privKey = bs58.encode(
-    Buffer.from(Converter.bytesToHex(baseKeypair.publicKey), "hex")
-  );
-  console.log(pubKey);
 
-  const keyPair = KeyPair.fromBase58(KeyType.Ed25519, pubKey, privKey);
-  console.log(keyPair);
+  // encode the bytes into base58
+  const pubKey = bs58.encode(baseKeypair.publicKey);
+  const privKey = bs58.encode(baseKeypair.privateKey);
 
-  const doc = Document.fromKeyPair(keyPair);
-  console.log(doc);
+  // create a new instance of KeyPair using the keypair
+  const key = KeyPair.fromBase58(KeyType.Ed25519, pubKey, privKey);
+  const doc = Document.fromKeyPair(key);
+
+  const receipt = await publish(doc.toJSON(), clientConfig);
+  await createEncryptedVault(key, "password", "keypair");
+
+  return {
+    doc,
+    key,
+  };
 };
 
 const test = async () => {

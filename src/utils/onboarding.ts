@@ -3,14 +3,19 @@ import { createIdentity } from "./did";
 import { createEncryptedVault } from "./stronghold";
 
 const startOnboarding = async (owner: string, password: string) => {
-  const { key, doc, mnemonic } = await createIdentity();
-  await createEncryptedVault(key, "master-config", password);
-  await writeConfig({
-    owner,
-    did: doc,
-    mnemonic,
-  });
-  return await getConfig();
+  try {
+    const { owner } = await getConfig();
+    if (owner) return null;
+  } catch (error) {
+    const { key, doc, mnemonic } = await createIdentity();
+    await createEncryptedVault(key, "master-config", password);
+    await writeConfig({
+      owner,
+      did: doc,
+      mnemonic,
+    });
+    return await getConfig();
+  }
 };
 
 export { startOnboarding };

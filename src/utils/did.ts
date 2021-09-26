@@ -11,8 +11,6 @@ import bs58 from "bs58";
 const createIdentity = async (clientConfig: Object = {}) => {
   const mnemonic = Bip39.randomMnemonic();
 
-  console.log(mnemonic);
-
   const baseSeed = Ed25519Seed.fromMnemonic(mnemonic);
   const baseKeypair = baseSeed.keyPair();
 
@@ -25,18 +23,13 @@ const createIdentity = async (clientConfig: Object = {}) => {
   const doc = Document.fromKeyPair(key);
 
   const receipt = await publish(doc.toJSON(), clientConfig);
-  await createEncryptedVault(key, "password", "keypair");
 
   return {
     doc,
     key,
+    mnemonic,
+    receipt,
   };
 };
-
-const test = async () => {
-  await createIdentity();
-};
-
-test();
 
 export { createIdentity };

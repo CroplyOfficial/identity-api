@@ -19,14 +19,17 @@
     "@iota/identity-wasm": "^0.3.2",
     "@types/express": "^4.17.12",
     "@types/mongoose": "^5.11.97",
-    "@types/node": "^15.12.2",
+    "@types/node": "^15.14.9",
+    "await-exec": "^0.1.2",
     "bcryptjs": "^2.4.3",
+    "child_process": "^1.0.2",
     "concurrently": "^6.2.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.12.12"
+    "mongoose": "^5.12.12",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",

@@ -11,14 +11,9 @@ const createIdentity = async (clientConfig: Object = {}) => {
   doc.sign(key);
 
   const messageId = await publish(doc.toJSON(), clientConfig);
-
   await createEncryptedVault(key, "password", "key");
-  console.log(doc, key);
 
-  return {
-    messageId,
-    key,
-  };
+  return { key, doc };
 };
 
 export { createIdentity };

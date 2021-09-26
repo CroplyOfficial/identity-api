@@ -10,16 +10,16 @@ const exec = promisify(proc.exec);
  * @param {Object} data - data that needs to be encrypted
  *                 stronghold unto intself allows strings
  *                 but this funciton requires an Object
- * @param {String} password - the password to set for the
- *                 stronghold file
  * @param {String} record - record is basically the unique
  *                 identifier for the vault
+ * @param {String} password - the password to set for the
+ *                 stronghold file
  */
 
 const createEncryptedVault = async (
   data: Object,
-  password: string,
-  record: string
+  record: string,
+  password: string
 ) => {
   const { stdout } = await exec(
     `cargo run --example cli write --plain '${JSON.stringify(

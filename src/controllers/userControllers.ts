@@ -25,7 +25,6 @@ const identityCreation = asyncHandler(async (req: Request, res: Response) => {
         username,
         password,
         pin,
-        didMessage: messageId,
       });
 
       const token: string = tokenize(user._id);

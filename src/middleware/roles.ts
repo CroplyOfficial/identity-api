@@ -14,6 +14,8 @@ const checkForPermission = async (user: UserType, permission: string) => {
   // @ts-ignore
   if (role.toJSON()[permission] === true) {
     return true;
+  } else {
+    throw new Error("unauthorized");
   }
 };
 

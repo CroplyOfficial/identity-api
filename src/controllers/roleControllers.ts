@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import Role from "../models/Role";
 import asyncHandler from "express-async-handler";
+import Role from "../models/Role";
+import User from "../models/User";
 
 /**
  * Route to create a new role
@@ -23,4 +24,25 @@ const createRole = asyncHandler(async (req: Request, res: Response) => {
   res.json(role);
 });
 
-export { createRole };
+/**
+ * Route to assign a role to a user
+ *
+ * @route POST /api/roles/assign
+ * @returns {IUser}
+ */
+
+const assignRole = asyncHandler(async (req: Request, res: Response) => {
+  const { id, role } = req.body;
+  const user = await User.findById(id);
+  const newRole = await Role.findById(role);
+  if (user && newRole) {
+    user.role = newRole._id;
+    const updatedUser = await user.save();
+    res.json(updatedUser);
+  } else {
+    res.status(404);
+    throw new Error("User or Role Not Found");
+  }
+});
+
+export { createRole, assignRole };

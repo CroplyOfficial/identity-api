@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import User from "../models/User";
 import asyncHandler from "express-async-handler";
 import { getConfig } from "../utils/configUtil";
 
@@ -31,6 +31,16 @@ const ensureAuthorized = asyncHandler(async (req, res, next) => {
   }
 });
 
+const ensureIsStaff = asyncHandler(async (req, res, next) => {
+  const conf = await getConfig();
+  if (req.user.isStaff || String(req.user._id) === String(conf.owner)) {
+    next();
+  } else {
+    res.status(403);
+    throw new Error("User does not have enough permissions");
+  }
+});
+
 const ensureIsOwner = asyncHandler(async (req, res, next) => {
   const conf = await getConfig();
   if (conf.owner === req.user._id) {
@@ -41,4 +51,4 @@ const ensureIsOwner = asyncHandler(async (req, res, next) => {
   }
 });
 
-export { ensureAuthorized };
+export { ensureAuthorized, ensureIsStaff, ensureIsOwner };

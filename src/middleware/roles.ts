@@ -6,7 +6,7 @@ import asyncHandler from "express-async-handler";
 
 const checkForPermission = async (user: UserType, permission: string) => {
   const conf = await getConfig();
-  if (conf.owner === user._id) return true;
+  if (String(conf.owner) === String(user._id)) return true;
   const role: RoleType | null = await Role.findById(user.role);
   if (!role) {
     throw new Error("unauthorized");

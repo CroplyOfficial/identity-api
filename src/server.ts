@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { connectToDB } from "./config/connectMongo";
 import userRoutes from "./routes/usersRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import roleRoutes from "./routes/roleRoutes";
 
 // middlewares
 import { errorHandler } from "./middleware/errors";
@@ -24,6 +25,7 @@ app.use(express.json());
 // + set all the routes
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/roles", roleRoutes);
 
 // + use the error handler middleware
 app.use(errorHandler);

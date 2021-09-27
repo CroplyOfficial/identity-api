@@ -10,7 +10,17 @@ import asyncHandler from "express-async-handler";
  */
 
 const createRole = asyncHandler(async (req: Request, res: Response) => {
-  console.log(req.body);
+  const { users, name, history, applications, credentials, identity } =
+    req.body;
+  const role = await Role.create({
+    name: name,
+    canManageUsers: users,
+    canViewHistory: history,
+    canManageApplications: applications,
+    canManageCredentials: credentials,
+    canManageIdentity: identity,
+  });
+  res.json(role);
 });
 
 export { createRole };

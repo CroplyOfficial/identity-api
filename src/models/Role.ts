@@ -5,6 +5,7 @@ const roleSchema: Schema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      unique: true,
     },
     canManageCredentials: {
       type: Boolean,

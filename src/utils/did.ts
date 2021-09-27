@@ -22,6 +22,8 @@ const createIdentity = async (clientConfig: Object = {}) => {
   const key = KeyPair.fromBase58(KeyType.Ed25519, pubKey, privKey);
   const doc = Document.fromKeyPair(key);
 
+  doc.sign(key);
+
   const receipt = await publish(doc.toJSON(), clientConfig);
 
   return {

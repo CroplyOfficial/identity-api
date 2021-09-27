@@ -4,8 +4,7 @@ import {
   KeyType,
   KeyPair,
 } from "@iota/identity-wasm/node/identity_wasm.js";
-import { Ed25519Seed, Bip39, Converter, Ed25519 } from "@iota/iota.js";
-import { createEncryptedVault } from "./stronghold";
+import { Ed25519Seed, Bip39 } from "@iota/iota.js";
 import bs58 from "bs58";
 
 const createIdentity = async (clientConfig: Object = {}) => {

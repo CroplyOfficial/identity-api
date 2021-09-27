@@ -14,7 +14,11 @@ const userSchema: Schema = new mongoose.Schema(
     pin: {
       type: String,
     },
-    isAdmin: {
+    role: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Role",
+    },
+    isStaff: {
       type: Boolean,
       required: true,
       default: false,
@@ -31,7 +35,8 @@ export interface UserType extends mongoose.Document {
   username: string;
   password: string;
   pin: string;
-  isAdmin: boolean;
+  role: mongoose.Schema.Types.ObjectId;
+  isStaff: boolean;
 }
 
 /* ------- model methods ---------*/

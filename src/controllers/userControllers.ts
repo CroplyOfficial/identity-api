@@ -10,7 +10,7 @@ import { Request, Response } from "express";
  *  @access  public
  */
 
-const identityCreation = asyncHandler(async (req: Request, res: Response) => {
+const createUser = asyncHandler(async (req: Request, res: Response) => {
   const { username, password, pin }: any = req.body;
 
   // try to find a user with the username
@@ -99,4 +99,4 @@ const loginWithPassword = asyncHandler(async (req, res) => {
   }
 });
 
-export { identityCreation, loginWithPin, loginWithPassword };
+export { createUser, loginWithPin, loginWithPassword };

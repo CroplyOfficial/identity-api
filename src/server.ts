@@ -1,13 +1,14 @@
 // + Import NPM Modules
-import express from 'express';
-import dotenv from 'dotenv';
+import express from "express";
+import dotenv from "dotenv";
 
 // our functions/modules
-import { connectToDB } from './config/connectMongo';
-import userRoutes from './routes/usersRoutes';
+import { connectToDB } from "./config/connectMongo";
+import userRoutes from "./routes/usersRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 // middlewares
-import { errorHandler } from './middleware/errors';
+import { errorHandler } from "./middleware/errors";
 
 // + initialize the dotenv module so that we can access variables in .env file via `process.env`
 dotenv.config();
@@ -21,7 +22,8 @@ const app = express();
 app.use(express.json());
 
 // + set all the routes
-app.use('/api/users', userRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
 // + use the error handler middleware
 app.use(errorHandler);

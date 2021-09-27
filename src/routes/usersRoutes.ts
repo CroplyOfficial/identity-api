@@ -1,15 +1,16 @@
 import express from "express";
 import { ensureAuthorized } from "../middleware/auth";
+import { onboarding } from "../controllers/adminControllers";
 
 import {
-  identityCreation,
+  createUser,
   loginWithPassword,
   loginWithPin,
 } from "../controllers/userControllers";
 
 const router = express.Router();
 
-router.route("/").post(identityCreation);
+router.route("/").post(createUser);
 
 router.route("/login_with_pin").post(loginWithPin);
 

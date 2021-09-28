@@ -8,7 +8,8 @@ const getConfig = async () => {
 interface IConfig {
   owner: string;
   did: any;
-  mnemonic: string;
+  receipt: string;
+  updatedReceipt: string;
 }
 const writeConfig = async (config: IConfig) => {
   await fs.writeFile("config.json", JSON.stringify(config), "utf-8");

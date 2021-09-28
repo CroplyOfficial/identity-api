@@ -74,7 +74,7 @@ const createVerifiableCredential = async (
 
 interface IVerifiableCredentialCheck {
   DVID: boolean;
-  Tangle: boolean;
+  VC: boolean;
 }
 const verifyCredential = async (
   credential: any
@@ -109,7 +109,7 @@ const verifyCredential = async (
 
   return {
     DVID: isDomainVerfied,
-    Tangle: isTangleVerified.verified,
+    VC: isTangleVerified.verified,
   };
 };
 

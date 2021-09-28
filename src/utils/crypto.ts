@@ -58,6 +58,14 @@ const decryptJSON = (json: any) => {
   return decryptedData;
 };
 
+const splitNChars = (txt: string, num: number): string[] => {
+  var result: string[] = [];
+  for (var i = 0; i < txt.length; i += num) {
+    result.push(txt.substr(i, num));
+  }
+  return result;
+};
+
 const minifyRSA = (key: string) => {
   const rawData = key
     .split("-----BEGIN RSA PUBLIC KEY-----\n")[1]
@@ -67,7 +75,7 @@ const minifyRSA = (key: string) => {
 };
 
 const convertToPEM = (minified: string) => {
-  const rawData = minified.match(/.{1,64}/g);
+  let rawData = splitNChars(minified, 64);
   if (!rawData) throw new Error("invalid key");
   const multilineBase64 = rawData.join("\n");
   return (

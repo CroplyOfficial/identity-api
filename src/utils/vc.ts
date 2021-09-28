@@ -3,6 +3,7 @@ import {
   VerifiableCredential,
   Document,
   KeyPair,
+  checkCredential,
 } from "@iota/identity-wasm/node";
 import { createIdentity } from "./did";
 import { readDataFromVault } from "./stronghold";
@@ -68,10 +69,16 @@ const createVerifiableCredential = async (
  * public key available in the tangle
  *
  * @param VerifiableCredential
- * @returns {Boolean}
+ * @returns {IVerifiableCredentialCheck}
  */
 
-const verifyCredential = async (credential: any): Promise<boolean> => {
+interface IVerifiableCredentialCheck {
+  DVID: boolean;
+  Tangle: boolean;
+}
+const verifyCredential = async (
+  credential: any
+): Promise<IVerifiableCredentialCheck> => {
   const keys = await readDataFromVault("master-config", "password");
   const DVIDPair = JSON.parse(keys).DVIDPair;
   const rootDomain = String(JSON.parse(credential).id)
@@ -91,13 +98,19 @@ const verifyCredential = async (credential: any): Promise<boolean> => {
   let data = JSON.parse(credential).credentialSubject;
   const sign = bs58.decode(data.sign);
   delete data.sign;
-  const isVerfied = crypto.verify(
+  const isDomainVerfied = crypto.verify(
     "SHA256",
     Buffer.from(JSON.stringify(data)),
     pub,
     sign
   );
-  return isVerfied;
+
+  const isTangleVerified = await checkCredential(credential.toString(), {});
+
+  return {
+    DVID: isDomainVerfied,
+    Tangle: isTangleVerified.verified,
+  };
 };
 
 /**
@@ -117,7 +130,5 @@ const test = async () => {
   const result = await verifyCredential(vc);
   console.log(result);
 };
-
-test();
 
 export { createVerifiableCredential };

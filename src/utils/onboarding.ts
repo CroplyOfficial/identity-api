@@ -2,7 +2,6 @@ import { getConfig, writeConfig } from "./configUtil";
 import { createIssuerIdentity } from "./did";
 import { createEncryptedVault } from "./stronghold";
 import crypto from "crypto";
-import bs58 from "bs58";
 
 const startOnboarding = async (owner: string, password: string) => {
   try {
@@ -15,16 +14,16 @@ const startOnboarding = async (owner: string, password: string) => {
       modulusLength: 1024,
     });
 
-    const priv = privateKey.export({ type: "pkcs1", format: "der" });
-    const pub = publicKey.export({ type: "pkcs1", format: "der" });
+    const priv = privateKey.export({ type: "pkcs1", format: "pem" });
+    const pub = publicKey.export({ type: "pkcs1", format: "pem" });
 
     await createEncryptedVault(
       {
         didKeys: key.toJSON(),
         signing: signing.toJSON(),
         DVIDPair: {
-          public: bs58.encode(priv),
-          secret: bs58.encode(pub),
+          public: pub,
+          secret: priv,
         },
       },
       "master-config",

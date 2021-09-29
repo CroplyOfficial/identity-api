@@ -8,7 +8,16 @@ const applicationSchema: Schema = new mongoose.Schema(
       required: true,
     },
     fields: {
-      type: Array,
+      type: [
+        {
+          label: { type: String, required: true },
+          type: {
+            type: String,
+            required: true,
+            enum: ["text", "email", "number", "tel", "date"],
+          },
+        },
+      ],
       required: true,
     },
   },
@@ -19,7 +28,7 @@ const applicationSchema: Schema = new mongoose.Schema(
 
 export interface IApplicationField {
   label: string;
-  type: "text" | "email" | "number" | "tel";
+  type: "text" | "email" | "number" | "tel" | "date";
 }
 
 export interface ApplicationType extends mongoose.Document {

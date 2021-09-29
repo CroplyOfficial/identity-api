@@ -16,7 +16,7 @@ const createNewApplication = asyncHandler(
       name: string;
       fields: IApplicationField[];
     }
-    const { name, fields } = req.body as IReqBody;
+    const { name, fields }: IReqBody = req.body;
     if (!(name && fields)) {
       res.status(400);
       throw new Error("name and fields are required");

@@ -7,6 +7,7 @@ import { connectToDB } from "./config/connectMongo";
 import userRoutes from "./routes/usersRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import roleRoutes from "./routes/roleRoutes";
+import applicationRoutes from "./routes/applicationRoutes";
 
 // middlewares
 import { errorHandler } from "./middleware/errors";
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/applications", applicationRoutes);
 
 // + use the error handler middleware
 app.use(errorHandler);

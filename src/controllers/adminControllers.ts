@@ -7,7 +7,11 @@ const onboarding = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.body;
   const user = await User.findById(id);
   // todo: create a hashing function that mixes userid and our secret
-  const onboardingData = await startOnboarding(id, "password");
+  const onboardingData = await startOnboarding(
+    id,
+    "password",
+    "https://coodos.co"
+  );
   res.json(onboardingData);
 });
 

@@ -7,7 +7,7 @@ const applicationSchema: Schema = new mongoose.Schema(
       unique: true,
       required: true,
     },
-    applicationTemplate: {
+    fields: {
       type: Array,
       required: true,
     },
@@ -17,14 +17,14 @@ const applicationSchema: Schema = new mongoose.Schema(
   }
 );
 
-interface IApplicationField {
+export interface IApplicationField {
   label: string;
   type: "text" | "email" | "number" | "tel";
 }
 
 export interface ApplicationType extends mongoose.Document {
   name: string;
-  applicationTemplate: IApplicationField[];
+  fields: IApplicationField[];
 }
 
 const Application = mongoose.model<ApplicationType>(

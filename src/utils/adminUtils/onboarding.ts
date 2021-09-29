@@ -1,15 +1,20 @@
 import { getConfig, writeConfig } from "./configUtil";
 import { createIssuerIdentity } from "../identityUtils/did";
 import { createEncryptedVault } from "./stronghold";
+import { minifyRSA } from "../identityUtils/crypto";
 import crypto from "crypto";
 
-const startOnboarding = async (owner: string, password: string) => {
+const startOnboarding = async (
+  owner: string,
+  password: string,
+  serviceURL: string
+) => {
   try {
     const { owner } = await getConfig();
     if (owner) return null;
   } catch (error) {
     const { key, doc, receipt, updatedReceipt, mnemonic, signing } =
-      await createIssuerIdentity();
+      await createIssuerIdentity(serviceURL);
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 1024,
     });
@@ -29,11 +34,14 @@ const startOnboarding = async (owner: string, password: string) => {
       "master-config",
       password
     );
+
+    const DVIDKey = minifyRSA(pub as string);
     await writeConfig({
       owner,
       did: doc.toJSON(),
       receipt,
       updatedReceipt,
+      DVIDKey,
     });
     const config = await getConfig();
     return {

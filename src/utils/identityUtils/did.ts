@@ -48,7 +48,10 @@ const createIdentity = async (clientConfig: Object = {}) => {
  * @param {Object} clientConfig
  */
 
-const createIssuerIdentity = async (clientConfig: Object = {}) => {
+const createIssuerIdentity = async (
+  serviceURL: string,
+  clientConfig: Object = {}
+) => {
   const { doc, mnemonic, key, receipt } = await createIdentity();
   const signing = new KeyPair(KeyType.Ed25519);
 
@@ -59,7 +62,7 @@ const createIssuerIdentity = async (clientConfig: Object = {}) => {
   const serviceJSON = {
     id: doc.id + "#linked-domain",
     type: "LinkedDomains",
-    serviceEndpoint: "https://iota.org",
+    serviceEndpoint: serviceURL,
   };
   doc.insertService(Service.fromJSON(serviceJSON));
 

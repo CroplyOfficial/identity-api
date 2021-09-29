@@ -1,4 +1,4 @@
-import { getConfig } from "./configUtil";
+import { getConfig } from "../adminUtils/configUtil";
 import {
   VerifiableCredential,
   Document,
@@ -6,7 +6,7 @@ import {
   checkCredential,
 } from "@iota/identity-wasm/node";
 import { createIdentity } from "./did";
-import { readDataFromVault } from "./stronghold";
+import { readDataFromVault } from "../adminUtils/stronghold";
 import dns from "dns/promises";
 import crypto from "crypto";
 import bs58 from "bs58";
@@ -39,7 +39,6 @@ const createVerifiableCredential = async (
 
   const signingPair = JSON.parse(keys).DVIDPair;
   const priv = crypto.createPrivateKey(signingPair.secret);
-  const pub = crypto.createPublicKey(signingPair.public);
 
   const signBuffer = crypto.sign("SHA256", dataBuffer, priv);
 
@@ -79,8 +78,6 @@ interface IVerifiableCredentialCheck {
 const verifyCredential = async (
   credential: any
 ): Promise<IVerifiableCredentialCheck> => {
-  const keys = await readDataFromVault("master-config", "password");
-  const DVIDPair = JSON.parse(keys).DVIDPair;
   const rootDomain = String(JSON.parse(credential).id)
     .split("//")[1]
     .split("/")[0];

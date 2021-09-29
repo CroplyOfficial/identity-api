@@ -64,6 +64,44 @@ const createNewCredentialTemplate = asyncHandler(
 );
 
 /**
+ * Delete a credential template and return the deleted object
+ *
+ * @route DELETE /api/cred-templates/:id
+ * @returns CredentialTemplate
+ */
+
+const deleteCredentialTemplate = asyncHandler(
+  async (req: Request, res: Response) => {
+    const deletedCredential = await CredentialTemplate.findByIdAndDelete(
+      req.params.id
+    );
+    if (!deletedCredential) {
+      res.status(404);
+      throw new Error("CredentialTemplate not found");
+    }
+    res.json(deletedCredential);
+  }
+);
+
+/**
+ * Get a specific credential template by ID
+ *
+ * @route GET /api/cred-templates/:id
+ * @returns CredentialTemplate
+ */
+
+const getCredentialTemplateById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const credentialTemplate = await CredentialTemplate.findById(req.params.id);
+    if (!credentialTemplate) {
+      res.status(404);
+      throw new Error("CredentialTemplate not found");
+    }
+    res.json(credentialTemplate);
+  }
+);
+
+/**
  * Edit a credential template to modify the fields/name of the
  * credential template
  *
@@ -109,4 +147,6 @@ export {
   createNewCredentialTemplate,
   editCredentialTemplate,
   indexCredentialTemplates,
+  getCredentialTemplateById,
+  deleteCredentialTemplate,
 };

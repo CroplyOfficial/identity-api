@@ -5,6 +5,8 @@ import {
   createNewCredentialTemplate,
   editCredentialTemplate,
   indexCredentialTemplates,
+  getCredentialTemplateById,
+  deleteCredentialTemplate,
 } from "../controllers/credentialTemplateControllers";
 
 const router = express.Router();
@@ -17,15 +19,17 @@ router
     canManageCredentials,
     createNewCredentialTemplate
   )
-  .get(
-    ensureAuthorized,
-    ensureIsStaff,
-    canManageCredentials,
-    indexCredentialTemplates
-  );
+  .get(ensureAuthorized, indexCredentialTemplates);
 
 router
   .route("/:id")
+  .get(ensureAuthorized, getCredentialTemplateById)
+  .delete(
+    ensureAuthorized,
+    ensureIsStaff,
+    canManageCredentials,
+    deleteCredentialTemplate
+  )
   .patch(
     ensureAuthorized,
     ensureIsStaff,

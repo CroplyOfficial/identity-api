@@ -25,7 +25,7 @@ const createEncryptedVault = async (
     `cargo run --example cli write --plain '${JSON.stringify(
       data
     )}' --record-path "${record}" --pass "${password}"`,
-    { cwd: path.resolve(__dirname + "../../../stronghold.rs/") }
+    { cwd: path.resolve(__dirname + "../../../../stronghold.rs/") }
   );
   if (stdout && stdout.trim() === "Ok(())") {
     return "woop";
@@ -47,7 +47,7 @@ const createEncryptedVault = async (
 const readDataFromVault = async (record: string, password: string) => {
   const { stdout } = await exec(
     `cargo run --example cli read --record-path "${record}" --pass "${password}"`,
-    { cwd: path.resolve(__dirname + "../../../stronghold.rs/") }
+    { cwd: path.resolve(__dirname + "../../../../stronghold.rs/") }
   );
   const raw_data = stdout.split("Data: ")[1];
   const data = JSON.parse(raw_data);

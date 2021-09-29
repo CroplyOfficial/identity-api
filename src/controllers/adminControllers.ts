@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import { startOnboarding } from "../utils/onboarding";
+import { startOnboarding } from "../utils/adminUtils/onboarding";
 import { Request, Response } from "express";
 import User from "../models/User";
 

@@ -1,5 +1,5 @@
 import { getConfig, writeConfig } from "./configUtil";
-import { createIssuerIdentity } from "./did";
+import { createIssuerIdentity } from "../identityUtils/did";
 import { createEncryptedVault } from "./stronghold";
 import crypto from "crypto";
 

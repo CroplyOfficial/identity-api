@@ -1,4 +1,4 @@
-import { getConfig } from "../utils/configUtil";
+import { getConfig } from "../utils/adminUtils/configUtil";
 import User from "../models/User";
 import { UserType } from "../models/User";
 import Role, { RoleType } from "../models/Role";

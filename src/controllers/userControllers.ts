@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import User, { UserType } from "../models/User";
-import { tokenize } from "../utils/jwt";
-import { createIdentity } from "../utils/did";
+import { tokenize } from "../utils/authUtils/jwt";
+import { createIdentity } from "../utils/identityUtils/did";
 import { Request, Response } from "express";
 
 /*

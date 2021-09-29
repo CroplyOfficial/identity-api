@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 import asyncHandler from "express-async-handler";
-import { getConfig } from "../utils/configUtil";
+import { getConfig } from "../utils/adminUtils/configUtil";
 
 const ensureAuthorized = asyncHandler(async (req, res, next) => {
   let token: any;

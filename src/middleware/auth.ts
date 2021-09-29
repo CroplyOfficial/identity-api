@@ -43,7 +43,7 @@ const ensureIsStaff = asyncHandler(async (req, res, next) => {
 
 const ensureIsOwner = asyncHandler(async (req, res, next) => {
   const conf = await getConfig();
-  if (conf.owner === req.user._id) {
+  if (String(conf.owner) === String(req.user._id)) {
     next();
   } else {
     res.status(403);

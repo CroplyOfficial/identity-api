@@ -10,6 +10,7 @@ interface IConfig {
   did: any;
   receipt: string;
   updatedReceipt: string;
+  DVIDKey: string;
 }
 const writeConfig = async (config: IConfig) => {
   await fs.writeFile("config.json", JSON.stringify(config), "utf-8");

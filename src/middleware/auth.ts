@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 import asyncHandler from "express-async-handler";
-import { getConfig } from "../utils/configUtil";
+import { getConfig } from "../utils/adminUtils/configUtil";
 
 const ensureAuthorized = asyncHandler(async (req, res, next) => {
   let token: any;
@@ -43,7 +43,7 @@ const ensureIsStaff = asyncHandler(async (req, res, next) => {
 
 const ensureIsOwner = asyncHandler(async (req, res, next) => {
   const conf = await getConfig();
-  if (conf.owner === req.user._id) {
+  if (String(conf.owner) === String(req.user._id)) {
     next();
   } else {
     res.status(403);

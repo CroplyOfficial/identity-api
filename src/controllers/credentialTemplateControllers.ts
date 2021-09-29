@@ -5,11 +5,36 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 
 /**
- * Create a new application template that can be used by the organisation
+ * Get all the credential templates stored in the database and return the
+ * relevant pieces of information that are needed to list stuff
+ *
+ * @route GET /api/cred-templates
+ * @returns Array<CredentialTemplate>
+ */
+
+const indexCredentialTemplates = asyncHandler(
+  async (req: Request, res: Response) => {
+    CredentialTemplate.find()
+      .select([
+        "name",
+        "status",
+        "referenceCode",
+        "credentialType",
+        "createdAt",
+      ])
+      .exec()
+      .then((credentials) => {
+        res.json(credentials);
+      });
+  }
+);
+
+/**
+ * Create a new credential template that can be used by the organisation
  * to later create forms where people can apply for verifiable credentials
  *
  * @route POST /api/cred-templates
- * @returns Application
+ * @returns CredentialTemplate
  */
 
 const createNewCredentialTemplate = asyncHandler(
@@ -43,7 +68,7 @@ const createNewCredentialTemplate = asyncHandler(
  * credential template
  *
  * @route PATCH /api/cred-templates/:id
- * @returns Application
+ * @returns CredentialTemplate
  */
 
 const editCredentialTemplate = asyncHandler(
@@ -80,4 +105,8 @@ const editCredentialTemplate = asyncHandler(
   }
 );
 
-export { createNewCredentialTemplate, editCredentialTemplate };
+export {
+  createNewCredentialTemplate,
+  editCredentialTemplate,
+  indexCredentialTemplates,
+};

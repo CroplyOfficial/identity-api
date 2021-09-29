@@ -1,9 +1,10 @@
 import express from "express";
 import { ensureAuthorized, ensureIsStaff } from "../middleware/auth";
-import { canManageApplications } from "../middleware/roles";
+import { canManageCredentials } from "../middleware/roles";
 import {
   createNewCredentialTemplate,
   editCredentialTemplate,
+  indexCredentialTemplates,
 } from "../controllers/credentialTemplateControllers";
 
 const router = express.Router();
@@ -13,8 +14,14 @@ router
   .post(
     ensureAuthorized,
     ensureIsStaff,
-    canManageApplications,
+    canManageCredentials,
     createNewCredentialTemplate
+  )
+  .get(
+    ensureAuthorized,
+    ensureIsStaff,
+    canManageCredentials,
+    indexCredentialTemplates
   );
 
 router
@@ -22,7 +29,7 @@ router
   .patch(
     ensureAuthorized,
     ensureIsStaff,
-    canManageApplications,
+    canManageCredentials,
     editCredentialTemplate
   );
 

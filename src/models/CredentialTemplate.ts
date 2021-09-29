@@ -16,6 +16,12 @@ const credentialTemplateSchema: Schema = new mongoose.Schema(
       required: true,
       enum: ["License", "Certificate", "Ticket"],
     },
+    status: {
+      type: String,
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
+      required: true,
+    },
     duration: {
       type: Number,
       required: true,

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Application, { IApplicationType } from "../models/Applications";
 import CredentialTemplate from "../models/CredentialTemplate";
+import { createVerifiableCredential } from "../utils/identityUtils/vc";
 
 /**
  * Get all the applications that have ever been registered
@@ -14,8 +15,14 @@ import CredentialTemplate from "../models/CredentialTemplate";
 
 const indexApplications = asyncHandler(async (req: Request, res: Response) => {
   const applications = await Application.find()
-    .populate("applicant")
-    .populate("template")
+    .select("-data")
+    .populate("applicant", ["username"])
+    .populate("template", [
+      "name",
+      "referenceCode",
+      "credentialType",
+      "duration",
+    ])
     .exec();
   if (!applications) {
     res.status(404);
@@ -57,4 +64,68 @@ const createNewApplication = asyncHandler(
   }
 );
 
-export { indexApplications, createNewApplication };
+/**
+ * Get an application by ID, this controller would be accesible
+ * only to org staff to view a cred in more detail
+ *
+ * @route GET /api/applications/:id
+ * @returns IApplicationType
+ */
+
+const getApplicationById = asyncHandler(async (req: Request, res: Response) => {
+  const application = await Application.findById(req.params.id)
+    .populate("applicant", ["username"])
+    .populate("template", [
+      "name",
+      "duration",
+      "referenceCode",
+      "credentialType",
+    ])
+    .exec();
+  if (!application) {
+    res.status(404);
+    throw new Error("Application not found");
+  }
+  res.json(application);
+});
+
+/**
+ * Update the status of the application by modding the status
+ * of the application, limited only to staff with canManageApplications
+ * perm obviously
+ *
+ * @route PATCH /api/applications/:id
+ * @returns IApplicationType
+ */
+
+const modApplicationStatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    const application = await Application.findById(req.params.id);
+
+    if (!application) {
+      res.status(404);
+      throw new Error("Application not found");
+    }
+    application.status = req.body.isApproved ? "APPROVED" : "DECLINED";
+    const updated = await application.save();
+    if (req.body.isApproved) {
+      // TODO change this later to actual shit
+      const vc = await createVerifiableCredential(
+        "http://coodos.co",
+        "did:iota:1231312313",
+        application.data
+      );
+      res.json({
+        application: updated,
+        vc,
+      });
+    }
+  }
+);
+
+export {
+  indexApplications,
+  createNewApplication,
+  getApplicationById,
+  modApplicationStatus,
+};

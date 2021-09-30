@@ -4,6 +4,8 @@ import { canManageApplications } from "../middleware/roles";
 import {
   createNewApplication,
   indexApplications,
+  getApplicationById,
+  modApplicationStatus,
 } from "../controllers/applicationControllers";
 
 const router = express.Router();
@@ -17,5 +19,20 @@ router
     indexApplications
   )
   .post(ensureAuthorized, createNewApplication);
+
+router
+  .route("/:id")
+  .get(
+    ensureAuthorized,
+    ensureIsStaff,
+    canManageApplications,
+    getApplicationById
+  )
+  .patch(
+    ensureAuthorized,
+    ensureIsStaff,
+    canManageApplications,
+    modApplicationStatus
+  );
 
 export default router;

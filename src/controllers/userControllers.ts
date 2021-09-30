@@ -11,7 +11,12 @@ import { Request, Response } from "express";
  */
 
 const createUser = asyncHandler(async (req: Request, res: Response) => {
-  const { username, password, pin }: any = req.body;
+  interface IReqBody {
+    username: string;
+    password: string;
+    pin?: string;
+  }
+  const { username, password, pin }: IReqBody = req.body;
 
   // try to find a user with the username
   const userExists = await User.findOne({ username });

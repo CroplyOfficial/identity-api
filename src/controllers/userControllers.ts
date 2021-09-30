@@ -43,6 +43,34 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Create a new user with the isStaff flag on, this
+ * user type can only be created by staff with the
+ * permissions to create a new user in the organisation
+ *
+ *  @route POST /api/users/staff-user
+ *  @returns User
+ */
+
+const newStaffUser = asyncHandler(async (req: Request, res: Response) => {
+  interface IReqBody {
+    username: string;
+    password: string;
+    pin: string;
+  }
+  const { username, password, pin }: IReqBody = req.body;
+  const staffUser = await User.create({
+    username,
+    password,
+    pin,
+    isStaff: true,
+  }).catch((error) => {
+    res.status(404);
+    throw new Error(`Unable to create staff user\n${error}`);
+  });
+  res.json(staffUser);
+});
+
 /*
  *  @desc    Login with pin
  *  @route   POST /api/users/login_with_pin
@@ -99,4 +127,4 @@ const loginWithPassword = asyncHandler(async (req, res) => {
   }
 });
 
-export { createUser, loginWithPin, loginWithPassword };
+export { createUser, newStaffUser, loginWithPin, loginWithPassword };

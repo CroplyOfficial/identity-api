@@ -5,7 +5,7 @@ import {
   createNewCredentialTemplate,
   editCredentialTemplate,
   indexCredentialTemplates,
-  getCredentialTemplateById,
+  findOneCredential,
   deleteCredentialTemplate,
 } from "../controllers/credentialTemplateControllers";
 
@@ -23,7 +23,6 @@ router
 
 router
   .route("/:id")
-  .get(ensureAuthorized, getCredentialTemplateById)
   .delete(
     ensureAuthorized,
     ensureIsStaff,
@@ -36,5 +35,7 @@ router
     canManageCredentials,
     editCredentialTemplate
   );
+
+router.route("/find").get(ensureAuthorized, findOneCredential);
 
 export default router;

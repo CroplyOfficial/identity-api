@@ -1,7 +1,6 @@
 import asyncHandler from "express-async-handler";
 import User, { UserType } from "../models/User";
 import { tokenize } from "../utils/authUtils/jwt";
-import { createIdentity } from "../utils/identityUtils/did";
 import { Request, Response } from "express";
 
 /*
@@ -24,12 +23,13 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   // proceed with creation if the username is avalaible
   if (!userExists) {
     try {
-      const { messageId }: any = await createIdentity();
-
-      const user: UserType = await User.create({
+      const user = await User.create({
         username,
         password,
         pin,
+      }).catch((error) => {
+        console.log(error);
+        throw new Error(error);
       });
 
       const token: string = tokenize(user._id);
@@ -38,7 +38,6 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
       res.json({ id: user._id, username: user.username, token });
     } catch (error) {
       res.status(400);
-      console.log(error);
       throw new Error("Bad request");
     }
   } else {

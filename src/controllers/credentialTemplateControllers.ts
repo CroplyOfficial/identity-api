@@ -3,6 +3,7 @@ import CredentialTemplate, {
 } from "../models/CredentialTemplate";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import { promisify } from "util";
 
 /**
  * Get all the credential templates stored in the database and return the
@@ -14,7 +15,7 @@ import asyncHandler from "express-async-handler";
 
 const indexCredentialTemplates = asyncHandler(
   async (req: Request, res: Response) => {
-    CredentialTemplate.find()
+    const credentials = await CredentialTemplate.find({ ...req.query })
       .select([
         "name",
         "status",
@@ -22,10 +23,8 @@ const indexCredentialTemplates = asyncHandler(
         "credentialType",
         "createdAt",
       ])
-      .exec()
-      .then((credentials) => {
-        res.json(credentials);
-      });
+      .exec();
+    res.json(credentials);
   }
 );
 
@@ -86,20 +85,20 @@ const deleteCredentialTemplate = asyncHandler(
 /**
  * Get a specific credential template by ID
  *
- * @route GET /api/cred-templates/:id
+ * @route GET /api/cred-templates/find
  * @returns CredentialTemplate
  */
 
-const getCredentialTemplateById = asyncHandler(
-  async (req: Request, res: Response) => {
-    const credentialTemplate = await CredentialTemplate.findById(req.params.id);
-    if (!credentialTemplate) {
-      res.status(404);
-      throw new Error("CredentialTemplate not found");
-    }
-    res.json(credentialTemplate);
+const findOneCredential = asyncHandler(async (req: Request, res: Response) => {
+  const credentialTemplate = await CredentialTemplate.findOne({
+    ...req.query,
+  });
+  if (!credentialTemplate) {
+    res.status(404);
+    throw new Error("CredentialTemplate not found");
   }
-);
+  res.json(credentialTemplate);
+});
 
 /**
  * Edit a credential template to modify the fields/name of the
@@ -147,6 +146,6 @@ export {
   createNewCredentialTemplate,
   editCredentialTemplate,
   indexCredentialTemplates,
-  getCredentialTemplateById,
+  findOneCredential,
   deleteCredentialTemplate,
 };

@@ -52,7 +52,7 @@ const createNewApplication = asyncHandler(
     const credKeys = credentialTemplate.fields.map((field) => field.label);
     if (JSON.stringify(credKeys) === JSON.stringify(Object.keys(data))) {
       const application = await Application.create({
-        applicant: req.user._id,
+        applicant,
         template,
         data,
       });

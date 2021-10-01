@@ -22,6 +22,9 @@ const applicationSchema: Schema = new mongoose.Schema(
       enum: ["APPROVED", "DECLINED", "PENDING"],
       default: "PENDING",
     },
+    vc: {
+      type: Object,
+    },
   },
   {
     timestamps: true,
@@ -33,6 +36,7 @@ export interface IApplicationType extends mongoose.Document {
   template: mongoose.Schema.Types.ObjectId;
   data: Object;
   status: "APPROVED" | "DECLINED" | "PENDING";
+  vc?: Object;
 }
 
 const Application = mongoose.model<IApplicationType>(

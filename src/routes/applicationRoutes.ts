@@ -6,9 +6,12 @@ import {
   indexApplications,
   getApplicationById,
   modApplicationStatus,
+  getMyApplications,
 } from "../controllers/applicationControllers";
 
 const router = express.Router();
+
+router.route("/@me/current").get(ensureAuthorized, getMyApplications);
 
 router
   .route("/")

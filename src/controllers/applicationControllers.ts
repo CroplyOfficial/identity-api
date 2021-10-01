@@ -43,7 +43,7 @@ const indexApplications = asyncHandler(async (req: Request, res: Response) => {
 
 const createNewApplication = asyncHandler(
   async (req: Request, res: Response) => {
-    const { applicant, template, data } = req.body;
+    const { template, data } = req.body;
     const credentialTemplate = await CredentialTemplate.findById(template);
     if (!credentialTemplate) {
       res.status(404);
@@ -52,7 +52,7 @@ const createNewApplication = asyncHandler(
     const credKeys = credentialTemplate.fields.map((field) => field.label);
     if (JSON.stringify(credKeys) === JSON.stringify(Object.keys(data))) {
       const application = await Application.create({
-        applicant,
+        applicant: req.user._id,
         template,
         data,
       });
@@ -123,9 +123,35 @@ const modApplicationStatus = asyncHandler(
   }
 );
 
+/**
+ * Get all the applications that the current user has submitted
+ * to be converted into VerifiableCredentials
+ *
+ * @route GET /api/applications/@me/current
+ */
+
+const getMyApplications = asyncHandler(async (req: Request, res: Response) => {
+  const applications = await Application.find({ applicant: req.user._id })
+    .select("-data")
+    .populate("applicant", ["username"])
+    .populate("template", [
+      "name",
+      "referenceCode",
+      "credentialType",
+      "duration",
+    ])
+    .exec();
+  if (!applications) {
+    res.status(404);
+    throw new Error("No applications found");
+  }
+  res.json(applications);
+});
+
 export {
   indexApplications,
   createNewApplication,
   getApplicationById,
   modApplicationStatus,
+  getMyApplications,
 };

@@ -5,18 +5,20 @@ import {
   KeyPair,
   checkCredential,
 } from "@iota/identity-wasm/node";
-import { createIdentity } from "./did";
 import { readDataFromVault } from "../adminUtils/stronghold";
 import dns from "dns/promises";
 import crypto from "crypto";
 import bs58 from "bs58";
 import { minifyRSA, convertToPEM } from "./crypto";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config({ path: path.resolve(__dirname, "../../") });
 
 /**
  * Create a new verifiable credential that can be issued
  * using the issuer's DID to the DID that is provided in
  * the params of this function
- *
  * @param {Domain}
  * @param {DID} did of the the user to issue the cred
  * @param {credentialSubject} data for the credential
@@ -34,7 +36,10 @@ const createVerifiableCredential = async (
 
   const dataBuffer = Buffer.from(JSON.stringify(credentialSubject));
 
-  const keys = await readDataFromVault("master-config", "password");
+  const keys = await readDataFromVault(
+    "master-config",
+    process.env.STRONGHOLD_SECRET as string
+  );
   const issuer = Document.fromJSON(did);
 
   const signingPair = JSON.parse(keys).DVIDPair;

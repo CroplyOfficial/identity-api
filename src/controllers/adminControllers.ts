@@ -3,6 +3,10 @@ import { startOnboarding } from "../utils/adminUtils/onboarding";
 import { Request, Response } from "express";
 import { getConfig } from "../utils/adminUtils/configUtil";
 import User from "../models/User";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config({ path: path.join(__dirname, "../") });
 
 /**
  * Start the onboarding of the user which esentially does 3 tasks
@@ -14,14 +18,13 @@ import User from "../models/User";
  */
 
 const onboarding = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.body;
+  const { id, domain } = req.body;
   const user = await User.findById(id);
   if (!user) throw new Error("user not found");
-  // todo: create a hashing function that mixes userid and our secret
   const onboardingData = await startOnboarding(
     id,
-    "password",
-    "https://coodos.co"
+    process.env.STRONGHOLD_SECRET as string,
+    domain
   );
   res.json(onboardingData);
 });

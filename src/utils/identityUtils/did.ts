@@ -1,13 +1,21 @@
 import {
-  publish,
   Document,
   KeyType,
   KeyPair,
   VerificationMethod,
   Service,
+  Client,
+  Network,
+  Timestamp,
+  Config,
 } from "@iota/identity-wasm/node";
 import { Ed25519Seed, Bip39 } from "@iota/iota.js";
 import bs58 from "bs58";
+
+const clientConfig = Config.fromNetwork(Network.mainnet());
+clientConfig.setPermanode("https://chrysalis-chronicle.iota.org/api/mainnet/");
+
+const client = Client.fromConfig(clientConfig);
 
 /**
  * Create a regular normie DID that can be used by normal
@@ -16,9 +24,8 @@ import bs58 from "bs58";
  * @param {Object} clientConfig
  */
 
-const createIdentity = async (clientConfig: Object = {}) => {
+const createIdentity = async () => {
   const mnemonic = Bip39.randomMnemonic();
-
   const baseSeed = Ed25519Seed.fromMnemonic(mnemonic);
   const baseKeypair = baseSeed.keyPair();
 
@@ -28,10 +35,13 @@ const createIdentity = async (clientConfig: Object = {}) => {
 
   // create a new instance of KeyPair using the keypair
   const key = KeyPair.fromBase58(KeyType.Ed25519, pubKey, privKey);
-  const doc = Document.fromKeyPair(key);
+  const doc = Document.fromKeyPair(key, Network.mainnet().toString());
 
   doc.sign(key);
-  const receipt = await publish(doc.toJSON(), clientConfig);
+
+  const receipt = await client.publishDocument(doc.toJSON()).catch((error) => {
+    throw error;
+  });
 
   return {
     mnemonic,
@@ -48,14 +58,12 @@ const createIdentity = async (clientConfig: Object = {}) => {
  * @param {Object} clientConfig
  */
 
-const createIssuerIdentity = async (
-  serviceURL: string,
-  clientConfig: Object = {}
-) => {
+const createIssuerIdentity = async (serviceURL: string) => {
   const { doc, mnemonic, key, receipt } = await createIdentity();
   const signing = new KeyPair(KeyType.Ed25519);
 
   const method = VerificationMethod.fromDID(doc.id, signing, "signing");
+
   doc.insertMethod(method, "VerificationMethod");
 
   // Add a new ServiceEndpoint
@@ -66,10 +74,12 @@ const createIssuerIdentity = async (
   };
   doc.insertService(Service.fromJSON(serviceJSON));
 
-  doc.previousMessageId = receipt;
+  doc.previousMessageId = receipt.messageId;
+  doc.updated = Timestamp.nowUTC();
+
   doc.sign(key);
 
-  const updatedReceipt = await publish(doc.toJSON(), clientConfig);
+  const updatedReceipt = await client.publishDocument(doc.toJSON());
 
   return {
     doc,

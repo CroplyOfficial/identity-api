@@ -26,6 +26,7 @@ const onboarding = asyncHandler(async (req: Request, res: Response) => {
     process.env.STRONGHOLD_SECRET as string,
     domain
   );
+  console.log(onboardingData);
   res.json(onboardingData);
 });
 

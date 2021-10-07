@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@iota/identity-wasm": "^0.3.2",
+    "@iota/identity-wasm": "^0.3.11",
     "@iota/iota.js": "^1.6.3",
     "@types/bs58": "^4.0.1",
     "@types/express": "^4.17.12",

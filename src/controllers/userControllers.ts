@@ -99,7 +99,7 @@ const loginWithPin = asyncHandler(async (req, res) => {
       throw new Error(`User ${username} not found`);
     }
   } catch (error) {
-    throw new Error(error);
+    throw new Error(error as string);
   }
 });
 
@@ -127,7 +127,7 @@ const loginWithPassword = asyncHandler(async (req, res) => {
       throw new Error(`User ${username} not found`);
     }
   } catch (error) {
-    throw new Error(error);
+    throw new Error(error as string);
   }
 });
 

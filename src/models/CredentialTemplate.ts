@@ -58,7 +58,7 @@ export interface CrednetialTemplateType extends mongoose.Document {
 }
 
 const CrednetialTemplate = mongoose.model<CrednetialTemplateType>(
-  "CrednetialTemplate",
+  "CredentialTemplate",
   credentialTemplateSchema
 );
 

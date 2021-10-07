@@ -7,14 +7,14 @@ import crypto from "crypto";
 const startOnboarding = async (
   owner: string,
   password: string,
-  serviceURL: string
+  domain: string
 ) => {
   try {
     const { owner } = await getConfig();
     if (owner) return null;
   } catch (error) {
     const { key, doc, receipt, updatedReceipt, mnemonic, signing } =
-      await createIssuerIdentity(serviceURL);
+      await createIssuerIdentity(domain);
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 1024,
     });
@@ -40,6 +40,7 @@ const startOnboarding = async (
       owner,
       did: doc.toJSON(),
       receipt,
+      domain,
       updatedReceipt,
       DVIDKey,
     });

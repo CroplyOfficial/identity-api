@@ -9,6 +9,7 @@ interface IConfig {
   owner: string;
   did: any;
   receipt: string;
+  domain: string;
   updatedReceipt: string;
   DVIDKey: string;
 }

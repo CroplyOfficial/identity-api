@@ -1,7 +1,6 @@
 import asyncHandler from "express-async-handler";
 import User, { UserType } from "../models/User";
 import { tokenize } from "../utils/authUtils/jwt";
-import { createIdentity } from "../utils/identityUtils/did";
 import { Request, Response } from "express";
 
 /*
@@ -11,7 +10,12 @@ import { Request, Response } from "express";
  */
 
 const createUser = asyncHandler(async (req: Request, res: Response) => {
-  const { username, password, pin }: any = req.body;
+  interface IReqBody {
+    username: string;
+    password: string;
+    pin?: string;
+  }
+  const { username, password, pin }: IReqBody = req.body;
 
   // try to find a user with the username
   const userExists = await User.findOne({ username });
@@ -19,12 +23,13 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
   // proceed with creation if the username is avalaible
   if (!userExists) {
     try {
-      const { messageId }: any = await createIdentity();
-
-      const user: UserType = await User.create({
+      const user = await User.create({
         username,
         password,
         pin,
+      }).catch((error) => {
+        console.log(error);
+        throw new Error(error);
       });
 
       const token: string = tokenize(user._id);
@@ -33,7 +38,6 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
       res.json({ id: user._id, username: user.username, token });
     } catch (error) {
       res.status(400);
-      console.log(error);
       throw new Error("Bad request");
     }
   } else {
@@ -41,6 +45,34 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
     res.status(400);
     throw new Error("User already exists");
   }
+});
+
+/**
+ * Create a new user with the isStaff flag on, this
+ * user type can only be created by staff with the
+ * permissions to create a new user in the organisation
+ *
+ *  @route POST /api/users/staff-user
+ *  @returns User
+ */
+
+const newStaffUser = asyncHandler(async (req: Request, res: Response) => {
+  interface IReqBody {
+    username: string;
+    password: string;
+    pin: string;
+  }
+  const { username, password, pin }: IReqBody = req.body;
+  const staffUser = await User.create({
+    username,
+    password,
+    pin,
+    isStaff: true,
+  }).catch((error) => {
+    res.status(404);
+    throw new Error(`Unable to create staff user\n${error}`);
+  });
+  res.json(staffUser);
 });
 
 /*
@@ -99,4 +131,4 @@ const loginWithPassword = asyncHandler(async (req, res) => {
   }
 });
 
-export { createUser, loginWithPin, loginWithPassword };
+export { createUser, newStaffUser, loginWithPin, loginWithPassword };

@@ -10,6 +10,7 @@ const userSchema: Schema = new mongoose.Schema(
     },
     password: {
       type: String,
+      required: true,
     },
     pin: {
       type: String,
@@ -52,7 +53,11 @@ userSchema.methods.matchPin = async function (
   enteredPin: string
 ): Promise<boolean> {
   const self: any = this;
-  return await bcrypt.compare(enteredPin, self.pin);
+  if (self.pin) {
+    return await bcrypt.compare(enteredPin, self.pin);
+  } else {
+    return false;
+  }
 };
 
 userSchema.pre("save", async function (next) {
@@ -62,7 +67,9 @@ userSchema.pre("save", async function (next) {
   } else {
     const salt = await bcrypt.genSalt(10);
     self.password = await bcrypt.hash(self.password, salt);
-    self.pin = await bcrypt.hash(self.pin, salt);
+    if (self.pin && self.pin !== undefined) {
+      self.pin = await bcrypt.hash(self.pin, salt);
+    }
   }
 });
 

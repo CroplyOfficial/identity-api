@@ -131,21 +131,39 @@ const modApplicationStatus = asyncHandler(
  */
 
 const getMyApplications = asyncHandler(async (req: Request, res: Response) => {
-  const applications = await Application.find({ applicant: req.user._id })
-    .select("-data")
-    .populate("applicant", ["username"])
-    .populate("template", [
-      "name",
-      "referenceCode",
-      "credentialType",
-      "duration",
-    ])
-    .exec();
-  if (!applications) {
-    res.status(404);
-    throw new Error("No applications found");
+  if (req.query.id) {
+    const application = await Application.findById(req.query.id)
+      .populate("applicant", ["username"])
+      .populate("template", [
+        "name",
+        "referenceCode",
+        "credentialType",
+        "duration",
+      ])
+      .exec();
+    if (application) {
+      res.json(application);
+    } else {
+      res.status(404);
+      throw new Error("application not found");
+    }
+  } else {
+    const applications = await Application.find({ applicant: req.user._id })
+      .select("-data")
+      .populate("applicant", ["username"])
+      .populate("template", [
+        "name",
+        "referenceCode",
+        "credentialType",
+        "duration",
+      ])
+      .exec();
+    if (!applications) {
+      res.status(404);
+      throw new Error("No applications found");
+    }
+    res.json(applications);
   }
-  res.json(applications);
 });
 
 export {

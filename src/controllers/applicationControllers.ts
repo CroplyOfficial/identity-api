@@ -115,6 +115,8 @@ const modApplicationStatus = asyncHandler(
         "did:iota:1231312313",
         application.data
       );
+      application.vc = vc.toJSON();
+      await application.save();
       res.json({
         application: updated,
         vc,

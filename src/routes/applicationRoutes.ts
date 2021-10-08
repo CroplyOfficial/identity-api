@@ -7,6 +7,7 @@ import {
   getApplicationById,
   modApplicationStatus,
   getMyApplications,
+  checkCredential,
 } from "../controllers/applicationControllers";
 
 const router = express.Router();
@@ -37,5 +38,7 @@ router
     canManageApplications,
     modApplicationStatus
   );
+
+router.route("/@creds/verify").post(checkCredential);
 
 export default router;

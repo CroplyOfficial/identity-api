@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Application, { IApplicationType } from "../models/Applications";
 import CredentialTemplate from "../models/CredentialTemplate";
-import { createVerifiableCredential } from "../utils/identityUtils/vc";
+import { VerifiableCredential } from "@iota/identity-wasm/node";
+import {
+  createVerifiableCredential,
+  verifyCredential,
+} from "../utils/identityUtils/vc";
 
 /**
  * Get all the applications that have ever been registered
@@ -100,7 +104,9 @@ const getApplicationById = asyncHandler(async (req: Request, res: Response) => {
 
 const modApplicationStatus = asyncHandler(
   async (req: Request, res: Response) => {
-    const application = await Application.findById(req.params.id);
+    const application: any = await Application.findById(req.params.id)
+      .populate("template")
+      .exec();
 
     if (!application) {
       res.status(404);
@@ -113,7 +119,9 @@ const modApplicationStatus = asyncHandler(
       const vc = await createVerifiableCredential(
         "http://coodos.co",
         "did:iota:1231312313",
-        application.data
+        application.data,
+        application.template.credentialType,
+        application.template.duration
       );
       application.vc = vc.toJSON();
       await application.save();
@@ -168,10 +176,25 @@ const getMyApplications = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Verify the credential posted to this route and then check
+ * the credential against both the Domain AND the VC's actual
+ * check
+ *
+ * @param {VerifiableCredential} in the body
+ */
+
+const checkCredential = asyncHandler(async (req: Request, res: Response) => {
+  const cred = VerifiableCredential.fromJSON(req.body);
+  const result = await verifyCredential(cred);
+  res.json(result);
+});
+
 export {
   indexApplications,
   createNewApplication,
   getApplicationById,
   modApplicationStatus,
   getMyApplications,
+  checkCredential,
 };

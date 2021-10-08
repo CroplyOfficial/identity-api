@@ -22,12 +22,17 @@ clientConfig.setPermanode("https://chrysalis-chronicle.iota.org/api/mainnet/");
 
 const client = Client.fromConfig(clientConfig);
 
+const sortObject = (object: any) => {
+  return Object.keys(object)
+    .sort()
+    .reduce((r: any, k: any) => ((r[k] = object[k]), r), {});
+};
+
 /**
  * Create a new verifiable credential that can be issued
  * using the issuer's DID to the DID that is provided in
  * the params of this function
- * @param {Domain}
- * @param {DID} did of the the user to issue the cred
+ * @param {Domain} @param {DID} did of the the user to issue the cred
  * @param {credentialSubject} data for the credential @returns VerifiableCredential
  */
 
@@ -41,17 +46,16 @@ const createVerifiableCredential = async (
 ) => {
   const { did } = await getConfig();
   recipient = "did:iota:7v7uwpqrUATKHjwTWYq8ewD4xncN8hNwiZ4GkVixveTN";
-  const expiresEpoch = Date.now().valueOf() + duration * 1000;
-  console.log(expiresEpoch);
+  const expiresEpoch = String(Date.now().valueOf() + duration * 1000);
   credentialSubject = { id: recipient, expiresEpoch, ...credentialSubject };
-
-  const dataBuffer = Buffer.from(JSON.stringify(credentialSubject));
 
   const keys = await readDataFromVault(
     "master-config",
     password ?? (process.env.STRONGHOLD_SECRET as string)
   );
 
+  const sortedObj = sortObject(credentialSubject);
+  const dataBuffer = Buffer.from(JSON.stringify(sortedObj));
   const issuer = Document.fromJSON(did);
 
   const signingPair = JSON.parse(keys).DVIDPair;
@@ -115,12 +119,10 @@ const verifyCredential = async (
   let data = JSON.parse(credential).credentialSubject;
   const sign = bs58.decode(data.sign);
   delete data.sign;
-  const isDomainVerfied = crypto.verify(
-    "SHA256",
-    Buffer.from(JSON.stringify(data)),
-    pub,
-    sign
-  );
+
+  const sortedObj = sortObject(data);
+  const dataBuffer = Buffer.from(JSON.stringify(sortedObj));
+  const isDomainVerfied = crypto.verify("SHA256", dataBuffer, pub, sign);
   const vcCheck = await client.checkCredential(credential.toString());
 
   return {
@@ -134,12 +136,15 @@ const test = async () => {
   const vc = await createVerifiableCredential(
     "https://coodos.co",
     "did:iota:7v7uwpqrUATKHjwTWYq8ewD4xncN8hNwiZ4GkVixveTN",
-    { lol: "test" },
+    {
+      name: "The Good Boi Terrier",
+      species: "Yorkshire Terrier",
+      age: "2",
+    },
     "DogGoodCred",
     864000,
     "password"
   );
-  console.log(vc);
   const result = await verifyCredential(vc);
   console.log(result);
 };
@@ -148,4 +153,4 @@ if (require.main === module) {
   test();
 }
 
-export { createVerifiableCredential };
+export { createVerifiableCredential, verifyCredential };

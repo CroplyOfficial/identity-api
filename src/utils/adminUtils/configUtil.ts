@@ -8,9 +8,9 @@ const getConfig = async () => {
 interface IConfig {
   owner: string;
   did: any;
-  receipt: string;
+  receipt: any;
   domain: string;
-  updatedReceipt: string;
+  updatedReceipt: any;
   DVIDKey: string;
 }
 const writeConfig = async (config: IConfig) => {

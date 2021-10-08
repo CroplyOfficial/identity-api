@@ -3,43 +3,59 @@ import {
   VerifiableCredential,
   Document,
   KeyPair,
-  checkCredential,
+  Client,
+  Network,
+  Config,
 } from "@iota/identity-wasm/node";
 import { readDataFromVault } from "../adminUtils/stronghold";
 import dns from "dns/promises";
 import crypto from "crypto";
 import bs58 from "bs58";
-import { minifyRSA, convertToPEM } from "./crypto";
+import { convertToPEM } from "./crypto";
 import path from "path";
 import dotenv from "dotenv";
 
 dotenv.config({ path: path.resolve(__dirname, "../../") });
 
+const clientConfig = Config.fromNetwork(Network.mainnet());
+clientConfig.setPermanode("https://chrysalis-chronicle.iota.org/api/mainnet/");
+
+const client = Client.fromConfig(clientConfig);
+
+const sortObject = (object: any) => {
+  return Object.keys(object)
+    .sort()
+    .reduce((r: any, k: any) => ((r[k] = object[k]), r), {});
+};
+
 /**
  * Create a new verifiable credential that can be issued
  * using the issuer's DID to the DID that is provided in
  * the params of this function
- * @param {Domain}
- * @param {DID} did of the the user to issue the cred
- * @param {credentialSubject} data for the credential
- * @returns VerifiableCredential
+ * @param {Domain} @param {DID} did of the the user to issue the cred
+ * @param {credentialSubject} data for the credential @returns VerifiableCredential
  */
 
 const createVerifiableCredential = async (
   domain: string,
   recipient: string,
-  credentialSubject: Object
+  credentialSubject: Object,
+  crentialType: string,
+  duration: number,
+  password?: string
 ) => {
   const { did } = await getConfig();
-
-  credentialSubject = { id: recipient, ...credentialSubject };
-
-  const dataBuffer = Buffer.from(JSON.stringify(credentialSubject));
+  recipient = "did:iota:7v7uwpqrUATKHjwTWYq8ewD4xncN8hNwiZ4GkVixveTN";
+  const expiresEpoch = String(Date.now().valueOf() + duration * 1000);
+  credentialSubject = { id: recipient, expiresEpoch, ...credentialSubject };
 
   const keys = await readDataFromVault(
     "master-config",
-    process.env.STRONGHOLD_SECRET as string
+    password ?? (process.env.STRONGHOLD_SECRET as string)
   );
+
+  const sortedObj = sortObject(credentialSubject);
+  const dataBuffer = Buffer.from(JSON.stringify(sortedObj));
   const issuer = Document.fromJSON(did);
 
   const signingPair = JSON.parse(keys).DVIDPair;
@@ -47,11 +63,14 @@ const createVerifiableCredential = async (
 
   const signBuffer = crypto.sign("SHA256", dataBuffer, priv);
 
-  credentialSubject = { ...credentialSubject, sign: bs58.encode(signBuffer) };
+  credentialSubject = {
+    ...credentialSubject,
+    sign: bs58.encode(signBuffer),
+  };
 
   const unsignedVC = VerifiableCredential.extend({
     id: `${domain}/verify/vc${recipient}`,
-    type: "VerifiableLolCredential",
+    type: crentialType,
     issuer: issuer.id.toString(),
     credentialSubject,
   });
@@ -100,37 +119,38 @@ const verifyCredential = async (
   let data = JSON.parse(credential).credentialSubject;
   const sign = bs58.decode(data.sign);
   delete data.sign;
-  const isDomainVerfied = crypto.verify(
-    "SHA256",
-    Buffer.from(JSON.stringify(data)),
-    pub,
-    sign
-  );
 
-  const isTangleVerified = await checkCredential(credential.toString(), {});
+  const sortedObj = sortObject(data);
+  const dataBuffer = Buffer.from(JSON.stringify(sortedObj));
+  const isDomainVerfied = crypto.verify("SHA256", dataBuffer, pub, sign);
+  const vcCheck = await client.checkCredential(credential.toString());
 
   return {
     DVID: isDomainVerfied,
-    VC: isTangleVerified.verified,
+    VC: vcCheck.verified,
   };
 };
 
-/**
- * dear traveller, 'tis but a test do not use it for something
- */
-
 const test = async () => {
-  console.log("creating vc...");
+  console.log("creating credential");
   const vc = await createVerifiableCredential(
-    "http://coodos.co",
-    "did:iota:3Tmo5Rn5hEbpquRk1NQjiuDEANqESfm5Xm1EryDSa7Dd",
+    "https://coodos.co",
+    "did:iota:7v7uwpqrUATKHjwTWYq8ewD4xncN8hNwiZ4GkVixveTN",
     {
-      name: "lol",
-    }
+      name: "The Good Boi Terrier",
+      species: "Yorkshire Terrier",
+      age: "2",
+    },
+    "DogGoodCred",
+    864000,
+    "password"
   );
-  console.log("verifying...");
   const result = await verifyCredential(vc);
   console.log(result);
 };
 
-export { createVerifiableCredential };
+if (require.main === module) {
+  test();
+}
+
+export { createVerifiableCredential, verifyCredential };

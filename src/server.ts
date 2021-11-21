@@ -1,6 +1,7 @@
 // + Import NPM Modules
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 // our functions/modules
 import { connectToDB } from "./config/connectMongo";
@@ -23,7 +24,21 @@ connectToDB();
 // + set the app to use JSON so that we can accept JSON data in body
 const app = express();
 app.use(express.json());
-
+app.use(
+  cors({
+    origin: ["http://localhost", "http://localhost:3000"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "token",
+      "Authorization",
+    ],
+  })
+);
 // + set all the routes
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);

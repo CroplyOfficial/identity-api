@@ -47,7 +47,7 @@ const indexApplications = asyncHandler(async (req: Request, res: Response) => {
 
 const createNewApplication = asyncHandler(
   async (req: Request, res: Response) => {
-    const { template, data } = req.body;
+    const { template, data, did } = req.body;
     const credentialTemplate = await CredentialTemplate.findById(template);
     if (!credentialTemplate) {
       res.status(404);
@@ -59,6 +59,7 @@ const createNewApplication = asyncHandler(
         applicant: req.user._id,
         template,
         data,
+        did,
       });
       res.json(application);
     } else {
@@ -118,7 +119,9 @@ const modApplicationStatus = asyncHandler(
       // TODO change this later to actual shit
       const vc = await createVerifiableCredential(
         "http://coodos.co",
-        "did:iota:1231312313",
+        application._id,
+        application.template.name,
+        application.did,
         application.data,
         application.template.credentialType,
         application.template.duration

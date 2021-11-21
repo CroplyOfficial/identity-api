@@ -24,6 +24,10 @@ const userSchema: Schema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    did: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

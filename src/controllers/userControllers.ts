@@ -103,6 +103,43 @@ const loginWithPin = asyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * Get user information
+ *
+ * @route GET /api/users/@me
+ * @access Bearer Token
+ */
+
+const getUserInfo = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const token = tokenize(user._id);
+  res.json({
+    user,
+    token,
+  });
+});
+
+/**
+ * Assign a did to the user who scans the QR and makes
+ * a request to do stuff
+ *
+ * @route POST /api/users/assign-token
+ * @access Bearer token
+ */
+
+const assignDID = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const { did } = req.body;
+  if (did) {
+    user.did = did;
+    const updated = await user.save();
+    res.json(updated);
+  } else {
+    res.status(400);
+    throw new Error("did is missing");
+  }
+});
+
 /*
  *  @desc    Login with password
  *  @route   POST /api/users/login_with_password
@@ -131,4 +168,29 @@ const loginWithPassword = asyncHandler(async (req, res) => {
   }
 });
 
-export { createUser, newStaffUser, loginWithPin, loginWithPassword };
+/**
+ * get all the staff users and return them
+ *
+ * @route /api/users/@staff
+ * @retunrs {IUser[]};
+ */
+
+const getStaffUsers = asyncHandler(async (req: Request, res: Response) => {
+  const users = await User.find({ isStaff: true }).populate("role").exec();
+  if (users) {
+    res.json(users);
+  } else {
+    res.status(404);
+    throw new Error("users not found");
+  }
+});
+
+export {
+  createUser,
+  newStaffUser,
+  loginWithPin,
+  loginWithPassword,
+  getStaffUsers,
+  getUserInfo,
+  assignDID,
+};

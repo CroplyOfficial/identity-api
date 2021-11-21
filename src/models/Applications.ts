@@ -25,6 +25,9 @@ const applicationSchema: Schema = new mongoose.Schema(
     vc: {
       type: Object,
     },
+    did: {
+      type: String,
+    },
   },
   {
     timestamps: true,

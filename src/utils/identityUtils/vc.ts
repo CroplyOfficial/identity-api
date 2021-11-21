@@ -38,6 +38,8 @@ const sortObject = (object: any) => {
 
 const createVerifiableCredential = async (
   domain: string,
+  id: string,
+  credType: string,
   recipient: string,
   credentialSubject: Object,
   crentialType: string,
@@ -45,9 +47,14 @@ const createVerifiableCredential = async (
   password?: string
 ) => {
   const { did } = await getConfig();
-  recipient = "did:iota:7v7uwpqrUATKHjwTWYq8ewD4xncN8hNwiZ4GkVixveTN";
   const expiresEpoch = String(Date.now().valueOf() + duration * 1000);
-  credentialSubject = { id: recipient, expiresEpoch, ...credentialSubject };
+  credentialSubject = {
+    "Credential Issuer": domain,
+    "Credential Type": credType,
+    id: recipient,
+    expiresEpoch,
+    ...credentialSubject,
+  };
 
   const keys = await readDataFromVault(
     "master-config",
@@ -69,7 +76,7 @@ const createVerifiableCredential = async (
   };
 
   const unsignedVC = VerifiableCredential.extend({
-    id: `${domain}/verify/vc${recipient}`,
+    id: `${domain}/verify/vc${id}`,
     type: crentialType,
     issuer: issuer.id.toString(),
     credentialSubject,
@@ -135,6 +142,8 @@ const test = async () => {
   console.log("creating credential");
   const vc = await createVerifiableCredential(
     "https://coodos.co",
+    "asdf123123123",
+    "The good boi license",
     "did:iota:7v7uwpqrUATKHjwTWYq8ewD4xncN8hNwiZ4GkVixveTN",
     {
       name: "The Good Boi Terrier",

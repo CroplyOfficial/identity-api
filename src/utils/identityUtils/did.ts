@@ -60,6 +60,7 @@ const createIdentity = async () => {
 
 const createIssuerIdentity = async (serviceURL: string) => {
   const { doc, mnemonic, key, receipt } = await createIdentity();
+  console.log(doc);
   const signing = new KeyPair(KeyType.Ed25519);
 
   const method = VerificationMethod.fromDID(doc.id, signing, "signing");

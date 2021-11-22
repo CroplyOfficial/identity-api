@@ -52,7 +52,7 @@ const createNewCredentialTemplate = asyncHandler(
       throw new Error("name and fields are required");
     }
     const newCredentialTemplate = await CredentialTemplate.create({
-      name,
+      name: name.trim(),
       referenceCode,
       credentialType,
       duration,
@@ -90,9 +90,11 @@ const deleteCredentialTemplate = asyncHandler(
  */
 
 const findOneCredential = asyncHandler(async (req: Request, res: Response) => {
+  console.log(req.query);
   const credentialTemplate = await CredentialTemplate.findOne({
     ...req.query,
   });
+  console.log(credentialTemplate);
   if (!credentialTemplate) {
     res.status(404);
     throw new Error("CredentialTemplate not found");

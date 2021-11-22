@@ -84,6 +84,8 @@ const createVerifiableCredential = async (
 
   const keyPair = KeyPair.fromJSON(JSON.parse(keys).signing);
 
+  console.log(keyPair);
+
   const signedVC = issuer.signCredential(unsignedVC, {
     method: issuer.id.toString() + "#signing",
     public: keyPair.public,
@@ -109,10 +111,9 @@ interface IVerifiableCredentialCheck {
 const verifyCredential = async (
   credential: any
 ): Promise<IVerifiableCredentialCheck> => {
-  const rootDomain = String(JSON.parse(credential).id)
-    .split("//")[1]
-    .split("/")[0];
+  const rootDomain = credential.id.split("//")[1].split("/")[0];
 
+  const vcCheck = await client.checkCredential(JSON.stringify(credential));
   const records = await dns.resolveTxt(rootDomain);
   const DVIDKeyRecord = records.find((record) =>
     record[0].includes("DVID.publicKey")
@@ -123,14 +124,13 @@ const verifyCredential = async (
   const pem = convertToPEM(DVIDKey);
   const pub = crypto.createPublicKey(pem);
 
-  let data = JSON.parse(credential).credentialSubject;
+  let data = credential.credentialSubject;
   const sign = bs58.decode(data.sign);
   delete data.sign;
 
   const sortedObj = sortObject(data);
   const dataBuffer = Buffer.from(JSON.stringify(sortedObj));
   const isDomainVerfied = crypto.verify("SHA256", dataBuffer, pub, sign);
-  const vcCheck = await client.checkCredential(credential.toString());
 
   return {
     DVID: isDomainVerfied,

@@ -92,4 +92,13 @@ const createIssuerIdentity = async (serviceURL: string) => {
   };
 };
 
+const tests = async () => {
+  const did = await createIdentity();
+  console.log(did);
+};
+
+if (require.main === module) {
+  tests();
+}
+
 export { createIssuerIdentity, createIdentity };

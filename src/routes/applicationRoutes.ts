@@ -8,6 +8,7 @@ import {
   modApplicationStatus,
   getMyApplications,
   checkCredential,
+  revokeCredential,
 } from "../controllers/applicationControllers";
 
 const router = express.Router();
@@ -37,6 +38,15 @@ router
     ensureIsStaff,
     canManageApplications,
     modApplicationStatus
+  );
+
+router
+  .route("/revoke/:id")
+  .post(
+    ensureAuthorized,
+    ensureIsStaff,
+    canManageApplications,
+    revokeCredential
   );
 
 router.route("/@creds/verify").post(checkCredential);

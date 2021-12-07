@@ -8,6 +8,8 @@ import {
   Network,
   Timestamp,
   Config,
+  KeyCollection,
+  Digest,
 } from "@iota/identity-wasm/node";
 import { Ed25519Seed, Bip39 } from "@iota/iota.js";
 import bs58 from "bs58";
@@ -60,10 +62,16 @@ const createIdentity = async () => {
 
 const createIssuerIdentity = async (serviceURL: string) => {
   const { doc, mnemonic, key, receipt } = await createIdentity();
-  console.log(doc);
   const signing = new KeyPair(KeyType.Ed25519);
 
-  const method = VerificationMethod.fromDID(doc.id, signing, "signing");
+  // create merkle key collection
+  const keys = new KeyCollection(KeyType.Ed25519, 512);
+  const method = VerificationMethod.createMerkleKey(
+    Digest.Sha256,
+    doc.id,
+    keys,
+    "signing-collection"
+  );
 
   doc.insertMethod(method, "VerificationMethod");
 
@@ -85,6 +93,7 @@ const createIssuerIdentity = async (serviceURL: string) => {
   return {
     doc,
     key,
+    keys,
     signing,
     mnemonic,
     receipt,
@@ -93,8 +102,8 @@ const createIssuerIdentity = async (serviceURL: string) => {
 };
 
 const tests = async () => {
-  const did = await createIdentity();
-  console.log(did);
+  const issuerDid = await createIssuerIdentity("http://iota.org");
+  console.log(issuerDid);
 };
 
 if (require.main === module) {

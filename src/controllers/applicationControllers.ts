@@ -1,12 +1,14 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Application, { IApplicationType } from "../models/Applications";
 import CredentialTemplate from "../models/CredentialTemplate";
 import { VerifiableCredential } from "@iota/identity-wasm/node";
 import {
   createVerifiableCredential,
+  revokeKey,
   verifyCredential,
 } from "../utils/identityUtils/vc";
+import { getConfig } from "../utils/adminUtils/configUtil";
 
 /**
  * Get all the applications that have ever been registered
@@ -113,8 +115,30 @@ const modApplicationStatus = asyncHandler(
       res.status(404);
       throw new Error("Application not found");
     }
+
+    let signingKey;
+    const lastSigned = await Application.find()
+      .sort({ signingKey: -1 })
+      .limit(1)
+      .exec();
+
+    if (lastSigned) {
+      // have to check against undefined because of the number 0
+      // being a falsy value and evaluating the statement to become
+      // false each time
+      if (lastSigned[0].signingKey !== undefined) {
+        signingKey = lastSigned[0].signingKey + 1;
+      } else {
+        signingKey = 0;
+      }
+    } else {
+      signingKey = 0;
+    }
+
     application.status = req.body.isApproved ? "APPROVED" : "DECLINED";
+    application.signingKey = signingKey;
     const updated = await application.save();
+
     if (req.body.isApproved) {
       // TODO change this later to actual shit
       const vc = await createVerifiableCredential(
@@ -124,7 +148,8 @@ const modApplicationStatus = asyncHandler(
         application.did,
         application.data,
         application.template.credentialType,
-        application.template.duration
+        application.template.duration,
+        signingKey
       );
       application.vc = vc.toJSON();
       await application.save();
@@ -180,6 +205,30 @@ const getMyApplications = asyncHandler(async (req: Request, res: Response) => {
 });
 
 /**
+ * Revoke a credential by revoking it's associated merkle key
+ *
+ * @param {ObjectId} ApplicationId
+ * @route /api/applications/revoke/:id
+ */
+
+const revokeCredential = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const application = await Application.findById(req.params.id);
+    // MATCH signing key against undefined because the number 0 is a
+    // Falsey value and makes the expression false
+    if (application && application.signingKey !== undefined) {
+      await revokeKey(application?.signingKey);
+      application.status = "REVOKED";
+      const updated = await application.save();
+      res.json(updated);
+    } else {
+      console.log(application);
+      throw new Error("unable to revoke");
+    }
+  }
+);
+
+/**
  * Verify the credential posted to this route and then check
  * the credential against both the Domain AND the VC's actual
  * check
@@ -200,4 +249,5 @@ export {
   modApplicationStatus,
   getMyApplications,
   checkCredential,
+  revokeCredential,
 };

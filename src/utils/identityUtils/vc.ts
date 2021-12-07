@@ -1,4 +1,4 @@
-import { getConfig } from "../adminUtils/configUtil";
+import { getConfig, writeConfig } from "../adminUtils/configUtil";
 import {
   VerifiableCredential,
   Document,
@@ -6,6 +6,10 @@ import {
   Client,
   Network,
   Config,
+  VerificationMethod,
+  Digest,
+  KeyCollection,
+  Timestamp,
 } from "@iota/identity-wasm/node";
 import { readDataFromVault } from "../adminUtils/stronghold";
 import dns from "dns/promises";
@@ -44,9 +48,11 @@ const createVerifiableCredential = async (
   credentialSubject: Object,
   crentialType: string,
   duration: number,
+  signingKey: number,
   password?: string
 ) => {
   const { did } = await getConfig();
+
   const expiresEpoch = String(Date.now().valueOf() + duration * 1000);
   credentialSubject = {
     "Credential Issuer": domain,
@@ -75,6 +81,15 @@ const createVerifiableCredential = async (
     sign: bs58.encode(signBuffer),
   };
 
+  const merkleKeys = KeyCollection.fromJSON(JSON.parse(keys).merkleKeys);
+
+  const method = VerificationMethod.createMerkleKey(
+    Digest.Sha256,
+    issuer.id,
+    merkleKeys,
+    "signing-collection"
+  );
+
   const unsignedVC = VerifiableCredential.extend({
     id: `${domain}/verify/vc${id}`,
     type: crentialType,
@@ -82,14 +97,11 @@ const createVerifiableCredential = async (
     credentialSubject,
   });
 
-  const keyPair = KeyPair.fromJSON(JSON.parse(keys).signing);
-
-  console.log(keyPair);
-
   const signedVC = issuer.signCredential(unsignedVC, {
-    method: issuer.id.toString() + "#signing",
-    public: keyPair.public,
-    secret: keyPair.secret,
+    method: method.id.toString(),
+    public: merkleKeys.public(signingKey),
+    secret: merkleKeys.secret(signingKey),
+    proof: merkleKeys.merkleProof(Digest.Sha256, signingKey),
   });
 
   return signedVC;
@@ -111,7 +123,9 @@ interface IVerifiableCredentialCheck {
 const verifyCredential = async (
   credential: any
 ): Promise<IVerifiableCredentialCheck> => {
+  credential = JSON.parse(credential);
   const rootDomain = credential.id.split("//")[1].split("/")[0];
+  console.log(rootDomain);
 
   const vcCheck = await client.checkCredential(JSON.stringify(credential));
   const records = await dns.resolveTxt(rootDomain);
@@ -138,6 +152,46 @@ const verifyCredential = async (
   };
 };
 
+/**
+ * Revoke the merkle key associated with a credential thus revoking the
+ * credential totally
+ *
+ * @param {number} keyIndex
+ */
+
+const revokeKey = async (keyIndex: number): Promise<void> => {
+  const config = await getConfig();
+  const { did, updatedReceipt, nextReceipt } = config;
+  const prevReceipt = nextReceipt ?? updatedReceipt;
+  const issuer = Document.fromJSON(did);
+
+  const keys = await readDataFromVault(
+    "master-config",
+    process.env.STRONGHOLD_SECRET as string
+  );
+
+  console.log(Object.keys(JSON.parse(keys)));
+  const keyPair = KeyPair.fromJSON(JSON.parse(keys).didKeys);
+
+  const merkleKeys = KeyCollection.fromJSON(JSON.parse(keys).merkleKeys);
+
+  const method = VerificationMethod.createMerkleKey(
+    Digest.Sha256,
+    issuer.id,
+    merkleKeys,
+    "signing-collection"
+  );
+
+  issuer.revokeMerkleKey(method.id.toString(), keyIndex);
+  issuer.previousMessageId = prevReceipt.messageId;
+  issuer.updated = Timestamp.nowUTC();
+  issuer.sign(keyPair);
+
+  const newReceipt = await client.publishDocument(issuer);
+
+  writeConfig({ ...config, nextReceipt: newReceipt });
+};
+
 const test = async () => {
   console.log("creating credential");
   const vc = await createVerifiableCredential(
@@ -152,6 +206,7 @@ const test = async () => {
     },
     "DogGoodCred",
     864000,
+    0,
     "password"
   );
   const result = await verifyCredential(vc);
@@ -162,4 +217,4 @@ if (require.main === module) {
   test();
 }
 
-export { createVerifiableCredential, verifyCredential };
+export { createVerifiableCredential, verifyCredential, revokeKey };

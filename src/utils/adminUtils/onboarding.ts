@@ -13,7 +13,7 @@ const startOnboarding = async (
     const { owner } = await getConfig();
     if (owner) return null;
   } catch (error) {
-    const { key, doc, receipt, updatedReceipt, mnemonic, signing } =
+    const { key, keys, doc, receipt, updatedReceipt, mnemonic, signing } =
       await createIssuerIdentity(domain);
     const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 1024,
@@ -30,6 +30,7 @@ const startOnboarding = async (
           public: pub,
           secret: priv,
         },
+        merkleKeys: keys,
       },
       "master-config",
       password

@@ -19,11 +19,14 @@ const applicationSchema: Schema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["APPROVED", "DECLINED", "PENDING"],
+      enum: ["APPROVED", "DECLINED", "PENDING", "REVOKED"],
       default: "PENDING",
     },
     vc: {
       type: Object,
+    },
+    signingKey: {
+      type: Number,
     },
     did: {
       type: String,
@@ -38,7 +41,8 @@ export interface IApplicationType extends mongoose.Document {
   applicant: mongoose.Schema.Types.ObjectId;
   template: mongoose.Schema.Types.ObjectId;
   data: Object;
-  status: "APPROVED" | "DECLINED" | "PENDING";
+  status: "APPROVED" | "DECLINED" | "PENDING" | "REVOKED";
+  signingKey?: number;
   vc?: Object;
 }
 
